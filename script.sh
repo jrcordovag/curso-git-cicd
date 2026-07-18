@@ -1,5 +1,6 @@
 #!/bin/bash
 
-echo "Mensaje modificado directamente en master"
+
+echo "Mensaje definitivo: combinamos master y feature con exito"
 
 
