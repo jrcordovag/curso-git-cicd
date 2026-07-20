@@ -8,7 +8,7 @@ sumar() {
 }
 
 if [ $# = 2 ]; then
-	sumar $1 $2
+	sumar "$1" "$2"
 fi
 
 
