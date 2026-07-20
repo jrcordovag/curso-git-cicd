@@ -1,5 +1,5 @@
 # El nombre que aparecerá en la pestaña 'Actions' de GitHub
-name: Integracion Continua - Dia 4
+name: Integracion Continua - Dia 5
 
 # EVENTO: Qué dispara este pipeline. 
 # En este caso: cada vez que se haga un 'push' o un 'pull request' hacia la rama main.
@@ -11,7 +11,7 @@ on:
 
 # TRABAJOS: Qué va a hacer la automatización
 jobs:
-  verificar-script:
+  pruebas-y-calidad:
     # ENTORNO: La máquina virtual que nos prestará GitHub en la nube
     runs-on: ubuntu-latest
 
@@ -29,8 +29,14 @@ jobs:
       - name: Analizar la sintaxis de script.sh
         run: shellcheck script.sh
 
+      # Paso 4: Correr el análisis sobre nuestro archivo
+      - name: Analizar la sintaxis de test.sh
+        run: shellcheck test.sh
+
       # Paso 4: Darle permisos de ejecución al script y correrlo para ver que funcione
-      - name: Ejecutar script de prueba
-        run: |
-          chmod +x script.sh
-          ./script.sh
+      - name: Dar permisos de ejecucion
+        run: chmod +x script.sh test.sh
+
+      #Paso 5: Correr pruebas automatizadas
+      - name: Ejecutar pruebas automatizadas
+        run: ./test.sh
