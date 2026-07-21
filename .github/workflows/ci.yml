@@ -1,42 +1,62 @@
-# El nombre que aparecerá en la pestaña 'Actions' de GitHub
-name: Integracion Continua - Dia 5
+name: Pipeline CI-CD - Dia 6
 
-# EVENTO: Qué dispara este pipeline. 
-# En este caso: cada vez que se haga un 'push' o un 'pull request' hacia la rama main.
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# TRABAJOS: Qué va a hacer la automatización
 jobs:
+  # ==========================================
+  # ETAPA 1: INTEGRACIÓN CONTINUA (CI)
+  # ==========================================
   pruebas-y-calidad:
-    # ENTORNO: La máquina virtual que nos prestará GitHub en la nube
     runs-on: ubuntu-latest
 
-    # PASOS: Las instrucciones secuenciales que ejecutará la máquina
     steps:
-      # Paso 1: Usar una acción oficial de GitHub para clonar/descargar nuestro código dentro de la máquina virtual
       - name: Descargar el codigo del repositorio
         uses: actions/checkout@v4
 
-      # Paso 2: Instalar shellcheck en el Ubuntu de la nube para analizar el script
       - name: Instalar validador de Bash (ShellCheck)
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
-      # Paso 3: Correr el análisis sobre nuestro archivo
-      - name: Analizar la sintaxis de script.sh
-        run: shellcheck script.sh
+      - name: Analizar la sintaxis de script.sh y test.sh
+        run: |
+          shellcheck script.sh
+          shellcheck test.sh
 
-      # Paso 4: Correr el análisis sobre nuestro archivo
-      - name: Analizar la sintaxis de test.sh
-        run: shellcheck test.sh
-
-      # Paso 4: Darle permisos de ejecución al script y correrlo para ver que funcione
       - name: Dar permisos de ejecucion
         run: chmod +x script.sh test.sh
 
-      #Paso 5: Correr pruebas automatizadas
-      - name: Ejecutar pruebas automatizadas
+      - name: Ejecutar Pruebas Automatizadas
         run: ./test.sh
+
+  # ==========================================
+  # ETAPA 2: DESPLIEGUE CONTINUO (CD)
+  # ==========================================
+  despliegue-produccion:
+    runs-on: ubuntu-latest
+    # LA MAGIA DE CD: Solo se ejecuta si la etapa de CI pasa en VERDE
+    needs: pruebas-y-calidad
+    # Solo despliega en push directos a main, no en Pull Requests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Simular autenticacion y Despliegue en Servidor Remoto
+        # Inyectamos el Secreto guardado en GitHub como variable de entorno
+        env:
+          TOKEN_ACCESO: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "=== Iniciando Proceso de Despliegue Automático ==="
+          echo "Autenticando con el token de acceso remoto..."
+          # Verificamos que el secreto exista sin imprimir su valor real
+          if [ -z "$TOKEN_ACCESO" ]; then
+            echo "✖ Error: El token de despliegue no está configurado."
+            exit 1
+          fi
+          echo "✔ Autenticación exitosa."
+          echo "Desplegando la versión '$(git rev-parse --short HEAD)' al entorno de PRODUCCIÓN..."
+          echo "=== ¡Despliegue completado con éxito! 🚀 ==="
