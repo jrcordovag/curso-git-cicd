@@ -7,9 +7,21 @@ sumar() {
 	echo $((num1 + num2))
 }
 
-if [ $# = 2 ]; then
-	sumar "$1" "$2"
+generar_reporte() {
+	local estado=$1
+	if [ "$estado" = "ok" ]; then
+		echo "SISTEMA_OK"
+	else
+		echo "SISTEMA_ERROR"
+	fi 
+}
+
+
+if [ "$1" = "sumar" ]; then
+	sumar "$2" "$3"
+
+elif [ "$1" = "reporte" ]; then
+	generar_reporte "$2"
+
 fi
-
-
 
